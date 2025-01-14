@@ -1,11 +1,37 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { productService } from "../services/productService";
 import ImagePlaceholder from "../components/atoms/ImagePlaceholder";
 import { CATEGORIAS } from "../constants/categories";
 import { useAuth } from "../context/AuthContext";
 import { reservationService } from "../services/reservationService";
 import ReservationCalendar from "../components/molecules/ReservationCalendar";
+
+// eslint-disable-next-line react/prop-types
+const LoginAlert = ({ onClose, onLogin }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full">
+      <h3 className="text-xl font-semibold mb-4">Iniciar sesión requerido</h3>
+      <p className="text-gray-600 mb-6">
+        Para realizar una reserva, necesitas iniciar sesión primero.
+      </p>
+      <div className="flex justify-end space-x-3">
+        <button
+          onClick={onClose}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={onLogin}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+        >
+          Iniciar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -14,6 +40,8 @@ const ProductDetail = () => {
   const [error, setError] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -61,10 +89,14 @@ const ProductDetail = () => {
 
   const handleReserve = () => {
     if (!user) {
-      navigate("/login");
+      setShowLoginAlert(true);
       return;
     }
     setShowCalendar(true);
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
   };
 
   const handleConfirmReservation = async (dates) => {
@@ -135,7 +167,7 @@ const ProductDetail = () => {
               <div className="mt-8">
                 <button
                   onClick={handleReserve}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-all duration-300"
                 >
                   Reservar ahora
                 </button>
@@ -144,6 +176,13 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {showLoginAlert && (
+        <LoginAlert
+          onClose={() => setShowLoginAlert(false)}
+          onLogin={handleLogin}
+        />
+      )}
 
       {showCalendar && (
         <ReservationCalendar
