@@ -15,6 +15,7 @@ import ProductDetail from "./pages/ProductDetail";
 import UserReservations from "./pages/UserReservations";
 
 // Componente de ruta protegida
+// eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
